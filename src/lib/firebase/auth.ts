@@ -5,6 +5,7 @@ import {
   onAuthStateChanged,
   User,
   sendPasswordResetEmail,
+  confirmPasswordReset as firebaseConfirmPasswordReset,
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
@@ -66,10 +67,24 @@ export const signOutUser = async () => {
   }
 };
 
-// Password reset
+// Send password reset email
 export const resetPassword = async (email: string) => {
   try {
     await sendPasswordResetEmail(auth, email);
+    return { error: null };
+  } catch (error: unknown) {
+    const authError = error as AuthError;
+    return { error: authError.message };
+  }
+};
+
+// Confirm password reset
+export const confirmPasswordReset = async (
+  oobCode: string,
+  newPassword: string
+) => {
+  try {
+    await firebaseConfirmPasswordReset(auth, oobCode, newPassword);
     return { error: null };
   } catch (error: unknown) {
     const authError = error as AuthError;

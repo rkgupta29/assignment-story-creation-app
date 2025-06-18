@@ -247,7 +247,7 @@ export function CandidateSignupForm() {
             <p className="text-sm text-gray-600">
               Are you an employer?{" "}
               <Link
-                href="/signup/organisation"
+                href="/signup/organization"
                 className="text-primary hover:underline font-medium"
               >
                 Sign up as organization

@@ -21,6 +21,7 @@ export function AuthStatus() {
         <h3 className="font-semibold">Authenticated User</h3>
         <p>Email: {user?.email}</p>
         <p>UID: {user?.uid}</p>
+
         {user?.displayName && <p>Name: {user.displayName}</p>}
       </div>
 

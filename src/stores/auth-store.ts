@@ -63,8 +63,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       get().setUser(user);
     });
 
-    // Store the unsubscribe function globally so it can be called later if needed
-    window.__authUnsubscribe = unsubscribe;
+    if (typeof window !== "undefined") {
+      window.__authUnsubscribe = unsubscribe;
+    }
   },
 
   signOut: async () => {

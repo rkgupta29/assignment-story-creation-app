@@ -125,6 +125,14 @@ export function LoginForm() {
                       />
                     </FormControl>
                     <FormMessage />
+                    <div className="flex justify-end">
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Forgot your password?
+                      </Link>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -158,37 +166,27 @@ export function LoginForm() {
             </form>
           </Form>
 
-          <div className="mt-6 text-center">
-            <Link
-              href="/forgot-password"
-              className="text-sm text-primary hover:underline"
-            >
-              Forgot your password?
-            </Link>
-          </div>
-
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="mt-4 bg-white border border-background/10 p-4 rounded-lg">
+            <p className="text-sm text-gray-600 text-center">
               Don&apos;t have an account?{" "}
+            </p>
+            <div className="mt-2 text-center flex items-center justify-center gap-2">
               <Link
                 href="/signup/candidates"
-                className="text-primary hover:underline font-medium"
+                className="text-primary hover:underline font-medium text-sm"
               >
                 Sign up as candidate
               </Link>
-            </p>
-          </div>
-
-          <div className="mt-2 text-center">
-            <p className="text-sm text-gray-600">
-              Or{" "}
-              <Link
-                href="/signup/organisation"
-                className="text-primary hover:underline font-medium"
-              >
-                Sign up as organization
-              </Link>
-            </p>
+              <span className="text-lg text-gray-600">or</span>
+              <p className="text-sm text-gray-600">
+                <Link
+                  href="/signup/organization"
+                  className="text-primary hover:underline font-medium text-sm"
+                >
+                  Sign up as organization
+                </Link>
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

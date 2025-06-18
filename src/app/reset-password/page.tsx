@@ -1,5 +1,6 @@
 import React from "react";
+import { ResetPasswordForm } from "@/components/forms/ResetPasswordForm";
 
 export default function ResetPasswordPage() {
-  return <div>ResetPassword </div>;
+  return <ResetPasswordForm />;
 }
