@@ -1,6 +1,6 @@
-import { CandidateSignupForm } from "@/components/forms/CandidateSignupForm";
 import BrandLogo from "@/components/BrandLogo";
 import Image from "next/image";
+import OrganizationSignupForm from "@/components/forms/OrganizationSignupForm";
 
 export default function OrganizationSignupPage() {
   return (
@@ -25,7 +25,7 @@ export default function OrganizationSignupPage() {
           </div>
         </div>
         <div className="col-span-4">
-          <CandidateSignupForm />
+          <OrganizationSignupForm />
         </div>
       </div>
     </div>
