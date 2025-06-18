@@ -31,7 +31,7 @@ import {
   type CandidateSignupFormData,
 } from "@/lib/validations/auth";
 import { signUpCandidate } from "@/lib/firebase/auth";
-import { addDocument } from "@/lib/firebase/firestore";
+import { addDocumentWithId } from "@/lib/firebase/firestore";
 import { formatFirebaseAuthError } from "@/lib/utils/firebase-errors";
 import type { Candidate } from "@/types/auth";
 
@@ -72,14 +72,13 @@ export function CandidateSignupForm() {
           email: data.email,
           userType: "candidate",
           fullName: data.fullName,
-          profileCompleted: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        await addDocument("candidates", candidateData);
+        await addDocumentWithId("candidates", user.uid, candidateData);
 
-        router.push("/profile/complete");
+        router.push("/home");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

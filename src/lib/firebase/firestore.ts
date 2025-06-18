@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -86,6 +87,21 @@ export const addDocument = async <T extends DocumentData>(
     return docRef.id;
   } catch (error) {
     console.error("Error adding document:", error);
+    throw error;
+  }
+};
+
+// Add a document with a specific ID
+export const addDocumentWithId = async <T extends DocumentData>(
+  collectionName: string,
+  documentId: string,
+  data: T
+): Promise<void> => {
+  try {
+    const docRef = getDocumentRef(collectionName, documentId);
+    await setDoc(docRef, data);
+  } catch (error) {
+    console.error("Error adding document with ID:", error);
     throw error;
   }
 };
