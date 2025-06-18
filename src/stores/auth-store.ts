@@ -12,7 +12,6 @@ declare global {
 }
 
 interface AuthState {
-  user: User | null;
   userProfile: Candidate | Organization | null;
   loading: boolean;
   isAuthenticated: boolean;
@@ -38,7 +37,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setUser: (user: User | null) => {
     set({
-      user,
       isAuthenticated: !!user,
       loading: false,
       error: null,

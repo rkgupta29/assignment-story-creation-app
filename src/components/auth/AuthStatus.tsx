@@ -4,15 +4,8 @@ import { useAuthStoreWithInit } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 
 export function AuthStatus() {
-  const {
-    user,
-    userProfile,
-    loading,
-    isAuthenticated,
-    error,
-    clearError,
-    signOut,
-  } = useAuthStoreWithInit();
+  const { userProfile, loading, isAuthenticated, error, clearError, signOut } =
+    useAuthStoreWithInit();
 
   if (loading) {
     return <div className="p-4">Loading authentication...</div>;
@@ -21,6 +14,7 @@ export function AuthStatus() {
   if (!isAuthenticated) {
     return <div className="p-4">No user</div>;
   }
+  console.log(userProfile);
 
   return (
     <div className="p-4 space-y-4">
@@ -32,11 +26,8 @@ export function AuthStatus() {
           <h4 className="font-medium text-sm text-gray-700 mb-2">
             Firebase Auth Data:
           </h4>
-          <p className="text-sm">Email: {user?.email}</p>
-          <p className="text-sm">UID: {user?.uid}</p>
-          {user?.displayName && (
-            <p className="text-sm">Display Name: {user.displayName}</p>
-          )}
+          <p className="text-sm">Email: {userProfile?.email}</p>
+          <p className="text-sm">UID: {userProfile?.emailVerified}</p>
         </div>
 
         {/* User Profile Data from Firestore */}
@@ -48,11 +39,12 @@ export function AuthStatus() {
 
             {userProfile.userType === "candidate" && (
               <div className="space-y-1">
-                s<p className="text-sm">Full Name: {userProfile.fullName}</p>
+                <p className="text-sm">Full Name: {userProfile.fullName}</p>
                 <p className="text-sm">
                   Created: {userProfile.createdAt.toDateString()}
                 </p>
                 <p>{userProfile.userType}</p>
+                <p>{userProfile.emailVerified ? "Verified" : "Not Verified"}</p>
               </div>
             )}
 

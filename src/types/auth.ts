@@ -6,6 +6,7 @@ export interface BaseUser {
   userType: UserType;
   createdAt: Date;
   updatedAt: Date;
+  emailVerified: boolean;
 }
 
 export interface Candidate extends BaseUser {

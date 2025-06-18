@@ -34,7 +34,7 @@ import { signUpWithEmail } from "@/lib/firebase/auth";
 import { addDocumentWithId } from "@/lib/firebase/firestore";
 import { formatFirebaseAuthError } from "@/lib/utils/firebase-errors";
 import { useAuthStoreWithInit } from "@/stores/auth-store";
-import type { Candidate } from "@/types/auth";
+import { Candidate } from "@/types/auth";
 
 export function CandidateSignupForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +75,7 @@ export function CandidateSignupForm() {
           fullName: data.fullName,
           createdAt: new Date(),
           updatedAt: new Date(),
+          emailVerified: false,
         };
 
         await addDocumentWithId("candidates", user.uid, candidateData);

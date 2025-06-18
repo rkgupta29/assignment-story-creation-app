@@ -33,7 +33,7 @@ import { signUpWithEmail } from "@/lib/firebase/auth";
 import { addDocumentWithId } from "@/lib/firebase/firestore";
 import { formatFirebaseAuthError } from "@/lib/utils/firebase-errors";
 import { useAuthStoreWithInit } from "@/stores/auth-store";
-import type { Organization } from "@/types/auth";
+import { Organization } from "@/types/auth";
 
 export function OrganizationSignupForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +75,7 @@ export function OrganizationSignupForm() {
           websiteUrl: data.websiteUrl,
           createdAt: new Date(),
           updatedAt: new Date(),
+          emailVerified: false,
         };
 
         await addDocumentWithId("organizations", user.uid, organizationData);
