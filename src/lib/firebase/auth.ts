@@ -6,7 +6,6 @@ import {
   User,
   sendPasswordResetEmail,
   confirmPasswordReset as firebaseConfirmPasswordReset,
-  updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
   AuthError,
@@ -31,12 +30,7 @@ export const signInWithEmail = async (email: string, password: string) => {
   }
 };
 
-const signUp = async (
-  email: string,
-  password: string,
-  displayName: string,
-  additionalInfo: Record<string, string> = {}
-) => {
+export const signUpWithEmail = async (email: string, password: string) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -44,40 +38,12 @@ const signUp = async (
       password
     );
 
-    if (userCredential.user) {
-      await updateProfile(userCredential.user, {
-        displayName,
-        ...additionalInfo,
-      });
-    }
-
     return { user: userCredential.user, error: null };
   } catch (error: unknown) {
     const authError = error as AuthError;
     return { user: null, error: authError.message };
   }
 };
-
-export const signUpOrganisation = (
-  email: string,
-  password: string,
-  companyName: string,
-  websiteUrl: string
-) =>
-  signUp(email, password, companyName, {
-    websiteUrl,
-    userType: "organisation",
-  });
-
-export const signUpCandidate = (
-  email: string,
-  password: string,
-  fullName: string
-) =>
-  signUp(email, password, fullName, {
-    fullName,
-    userType: "candidate",
-  });
 
 // Sign out
 export const signOutUser = async () => {

@@ -35,6 +35,27 @@ export const candidateSignupSchema = z
     path: ["confirmPassword"],
   });
 
+export const organizationSignupSchema = z
+  .object({
+    companyName: z
+      .string()
+      .min(2, "Company name must be at least 2 characters"),
+    websiteUrl: z.string().url("Please enter a valid website URL"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 export const loginSchema = z.object({
   email: z
     .string()
@@ -70,6 +91,9 @@ export const resetPasswordSchema = z
   });
 
 export type CandidateSignupFormData = z.infer<typeof candidateSignupSchema>;
+export type OrganisationSignupFormData = z.infer<
+  typeof organizationSignupSchema
+>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

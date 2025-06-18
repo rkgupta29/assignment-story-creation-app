@@ -30,15 +30,17 @@ import {
   candidateSignupSchema,
   type CandidateSignupFormData,
 } from "@/lib/validations/auth";
-import { signUpCandidate } from "@/lib/firebase/auth";
+import { signUpWithEmail } from "@/lib/firebase/auth";
 import { addDocumentWithId } from "@/lib/firebase/firestore";
 import { formatFirebaseAuthError } from "@/lib/utils/firebase-errors";
+import { useAuthStoreWithInit } from "@/stores/auth-store";
 import type { Candidate } from "@/types/auth";
 
 export function CandidateSignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { fetchUserProfile } = useAuthStoreWithInit();
 
   const form = useForm<CandidateSignupFormData>({
     resolver: zodResolver(candidateSignupSchema),
@@ -56,10 +58,9 @@ export function CandidateSignupForm() {
     setError(null);
 
     try {
-      const { user, error: authError } = await signUpCandidate(
+      const { user, error: authError } = await signUpWithEmail(
         data.email,
-        data.password,
-        data.fullName
+        data.password
       );
 
       if (authError) {
@@ -78,6 +79,8 @@ export function CandidateSignupForm() {
 
         await addDocumentWithId("candidates", user.uid, candidateData);
 
+        await fetchUserProfile(user.uid);
+
         router.push("/home");
       }
     } catch (err) {
@@ -90,7 +93,7 @@ export function CandidateSignupForm() {
   return (
     <div className="h-full flex flex-col justify-center items-center">
       <Card className="w-full max-w-md border-transparent shadow-none">
-        <CardHeader className="space-y-3">
+        <CardHeader className="space-y-1">
           <CardTitle className="text-3xl font-semibold text-center font-pp tracking-wide">
             Create your account
           </CardTitle>

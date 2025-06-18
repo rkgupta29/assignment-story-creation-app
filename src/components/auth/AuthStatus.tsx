@@ -48,7 +48,7 @@ export function AuthStatus() {
 
             {userProfile.userType === "candidate" && (
               <div className="space-y-1">
-                <p className="text-sm">Full Name: {userProfile.fullName}</p>
+                s<p className="text-sm">Full Name: {userProfile.fullName}</p>
                 <p className="text-sm">
                   Created: {userProfile.createdAt.toDateString()}
                 </p>
