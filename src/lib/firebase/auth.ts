@@ -63,6 +63,7 @@ export const resetPassword = async (email: string) => {
     return { error: null };
   } catch (error: unknown) {
     const authError = error as AuthError;
+    console.log(authError);
     return { error: authError.message };
   }
 };

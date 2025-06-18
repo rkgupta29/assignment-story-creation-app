@@ -232,7 +232,7 @@ export function OrganizationSignupForm() {
             <p className="text-sm text-gray-600">
               Looking for a job?{" "}
               <Link
-                href="/signup"
+                href="/signup/candidates"
                 className="text-primary hover:underline font-medium"
               >
                 Sign up as candidate

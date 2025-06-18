@@ -3,17 +3,17 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStoreWithInit } from "@/stores/auth-store";
-import FullPageLoader from "../loaders/full-page";
+import FullPageLoader from "../../components/loaders/full-page";
 
-interface ProtectedRouteProps {
+interface ShouldBeAuthenticatedProps {
   children: React.ReactNode;
   redirectTo?: string;
 }
 
-export function ProtectedRoute({
+export function ShouldBeAuthenticated({
   children,
   redirectTo = "/login",
-}: ProtectedRouteProps) {
+}: ShouldBeAuthenticatedProps) {
   const { loading, isAuthenticated } = useAuthStoreWithInit();
   const router = useRouter();
 

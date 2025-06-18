@@ -119,8 +119,7 @@ export function ForgotPasswordForm() {
             Forgot your password?
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your email address and we&apos;ll send you a link to reset
-            your password.
+            You will receive an email with a link to reset your password.
           </CardDescription>
         </CardHeader>
         <CardContent>

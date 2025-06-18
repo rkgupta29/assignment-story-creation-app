@@ -1,6 +1,13 @@
-import React from "react";
+import { ShouldNotBeAuthenticated } from "@/lib/guards/ShouldNotBeAuthenticated";
 import { ForgotPasswordForm } from "@/components/forms/ForgotPasswordForm";
+import AuthLayoutWrapper from "@/components/auth/AuthLayoutWrapper";
 
-export default function ForgotPasswordPage() {
-  return <ForgotPasswordForm />;
+export default function ResetPasswordPage() {
+  return (
+    <ShouldNotBeAuthenticated>
+      <AuthLayoutWrapper>
+        <ForgotPasswordForm />
+      </AuthLayoutWrapper>
+    </ShouldNotBeAuthenticated>
+  );
 }
