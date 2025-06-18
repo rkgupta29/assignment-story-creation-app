@@ -14,15 +14,12 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Initialize Analytics conditionally (only in browser and if supported)
 export const analytics =
   typeof window !== "undefined"
     ? isSupported().then((yes) => (yes ? getAnalytics(app) : null))

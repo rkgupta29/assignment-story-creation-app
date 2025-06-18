@@ -1,6 +1,6 @@
-export interface IconProps {
+export interface IconComp {
   className?: string;
   width?: number | string;
   height?: number | string;
-  color?: string;
+  colorCode?: `#${string}` | "currentColor";
 }
