@@ -142,7 +142,6 @@ const handleFileUpload = async (file: File) => {
     allowedTypes: ["image/jpeg", "image/png"],
     maxSizeInMB: 5,
   });
-  console.log("File uploaded:", result.url);
 };
 ```
 

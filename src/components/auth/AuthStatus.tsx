@@ -12,7 +12,7 @@ export function AuthStatus() {
   }
 
   if (!isAuthenticated) {
-    return <div className="p-4">Not authenticated</div>;
+    return <div className="p-4">No user</div>;
   }
 
   return (

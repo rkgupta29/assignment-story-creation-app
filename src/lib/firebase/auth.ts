@@ -31,11 +31,11 @@ export const signInWithEmail = async (email: string, password: string) => {
   }
 };
 
-// Sign up with email and password
-export const signUpWithEmail = async (
+const signUp = async (
   email: string,
   password: string,
-  displayName?: string
+  displayName: string,
+  additionalInfo: Record<string, string> = {}
 ) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
@@ -44,9 +44,11 @@ export const signUpWithEmail = async (
       password
     );
 
-    // Update profile if display name is provided
-    if (displayName && userCredential.user) {
-      await updateProfile(userCredential.user, { displayName });
+    if (userCredential.user) {
+      await updateProfile(userCredential.user, {
+        displayName,
+        ...additionalInfo,
+      });
     }
 
     return { user: userCredential.user, error: null };
@@ -55,6 +57,27 @@ export const signUpWithEmail = async (
     return { user: null, error: authError.message };
   }
 };
+
+export const signUpOrganisation = (
+  email: string,
+  password: string,
+  companyName: string,
+  websiteUrl: string
+) =>
+  signUp(email, password, companyName, {
+    websiteUrl,
+    userType: "organisation",
+  });
+
+export const signUpCandidate = (
+  email: string,
+  password: string,
+  fullName: string
+) =>
+  signUp(email, password, fullName, {
+    fullName,
+    userType: "candidate",
+  });
 
 // Sign out
 export const signOutUser = async () => {

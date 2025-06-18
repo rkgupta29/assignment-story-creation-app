@@ -30,7 +30,7 @@ import {
   candidateSignupSchema,
   type CandidateSignupFormData,
 } from "@/lib/validations/auth";
-import { signUpWithEmail } from "@/lib/firebase/auth";
+import { signUpCandidate } from "@/lib/firebase/auth";
 import { addDocument } from "@/lib/firebase/firestore";
 import { formatFirebaseAuthError } from "@/lib/utils/firebase-errors";
 import type { Candidate } from "@/types/auth";
@@ -56,12 +56,11 @@ export function CandidateSignupForm() {
     setError(null);
 
     try {
-      const { user, error: authError } = await signUpWithEmail(
+      const { user, error: authError } = await signUpCandidate(
         data.email,
         data.password,
         data.fullName
       );
-      console.log(user, authError);
 
       if (authError) {
         setError(formatFirebaseAuthError(authError));
