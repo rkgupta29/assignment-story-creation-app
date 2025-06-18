@@ -1,6 +1,6 @@
 import { IconComp } from "@/types/common";
 
-export const LogoIcon = ({
+const BrandLogo = ({
   className,
   width = 100,
   height = 100,
@@ -14,7 +14,7 @@ export const LogoIcon = ({
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
-    <g clip-path="url(#clip0_2_2)">
+    <g clipPath="url(#clip0_2_2)">
       <path
         d="M71 36.5C71 55.5538 55.5538 71 36.5 71C17.4462 71 2 55.5538 2 36.5C2 17.4462 17.4462 2 36.5 2C55.5538 2 71 17.4462 71 36.5ZM14.363 36.5C14.363 48.726 24.274 58.637 36.5 58.637C48.726 58.637 58.637 48.726 58.637 36.5C58.637 24.274 48.726 14.363 36.5 14.363C24.274 14.363 14.363 24.274 14.363 36.5Z"
         fill={colorCode}
@@ -31,3 +31,5 @@ export const LogoIcon = ({
     </defs>
   </svg>
 );
+
+export default BrandLogo;
