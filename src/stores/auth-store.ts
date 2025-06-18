@@ -36,22 +36,30 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
 
   setUser: (user: User | null) => {
+    if (!user) {
+      set({
+        isAuthenticated: false,
+        loading: false,
+        error: null,
+        userProfile: null,
+      });
+      return;
+    }
+
     set({
-      isAuthenticated: !!user,
-      loading: false,
+      isAuthenticated: true,
       error: null,
     });
 
-    // Fetch user profile if user is authenticated
-    if (user) {
-      get().fetchUserProfile(user.uid);
-    } else {
-      set({ userProfile: null });
-    }
+    // Keep loading true until profile is fetched
+    get().fetchUserProfile(user.uid);
   },
 
   setUserProfile: (profile: Candidate | Organization | null) => {
-    set({ userProfile: profile });
+    set({
+      userProfile: profile,
+      loading: false, // Only set loading to false once profile is set
+    });
   },
 
   setLoading: (loading: boolean) => {
@@ -88,10 +96,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } as unknown as Candidate | Organization;
 
         get().setUserProfile(userProfile);
+      } else {
+        // If no profile found, set loading to false
+        set({ loading: false });
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
-      // Don't set error here as it's not critical for auth
+      // Set loading to false on error
+      set({ loading: false });
     }
   },
 

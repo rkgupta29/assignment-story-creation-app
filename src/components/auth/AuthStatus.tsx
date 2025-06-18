@@ -21,16 +21,6 @@ export function AuthStatus() {
       <div>
         <h3 className="font-semibold text-lg mb-3">Authenticated User</h3>
 
-        {/* Firebase Auth Data */}
-        <div className="mb-4 p-3 bg-gray-50 rounded-md">
-          <h4 className="font-medium text-sm text-gray-700 mb-2">
-            Firebase Auth Data:
-          </h4>
-          <p className="text-sm">Email: {userProfile?.email}</p>
-          <p className="text-sm">UID: {userProfile?.emailVerified}</p>
-        </div>
-
-        {/* User Profile Data from Firestore */}
         {userProfile ? (
           <div className="p-3 bg-blue-50 rounded-md">
             <h4 className="font-medium text-sm text-blue-700 mb-2">
