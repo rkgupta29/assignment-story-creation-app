@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,8 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/home";
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -60,7 +62,8 @@ export function LoginForm() {
       }
 
       if (user) {
-        router.push("/home");
+        // Redirect to the intended destination or home
+        router.push(redirectTo);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
