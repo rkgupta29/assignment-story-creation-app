@@ -1,4 +1,4 @@
-# Next.js Boilerplate with Tailwind CSS, shadcn/ui, and Custom Fonts
+# portal project
 
 This is a modern Next.js boilerplate with the following features:
 
