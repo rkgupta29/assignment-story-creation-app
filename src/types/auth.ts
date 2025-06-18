@@ -1,5 +1,3 @@
-import { User } from "firebase/auth";
-
 export type UserType = "candidate" | "organization";
 
 export interface BaseUser {
@@ -13,31 +11,13 @@ export interface BaseUser {
 export interface Candidate extends BaseUser {
   userType: "candidate";
   fullName: string;
-  profileCompleted: boolean;
-  phone?: string;
-  location?: string;
-  skills?: string[];
-  experience?: number;
-  education?: string;
-  resumeUrl?: string;
-  linkedinUrl?: string;
 }
 
 export interface Organization extends BaseUser {
   userType: "organization";
   companyName: string;
   websiteUrl: string;
-  profileCompleted: boolean;
   companyDescription?: string;
-  industry?: string;
-  companySize?: string;
-  headquarters?: string;
-  logoUrl?: string;
-  socialLinks?: {
-    linkedin?: string;
-    twitter?: string;
-    website?: string;
-  };
 }
 
 export interface CandidateSignupFormData {
@@ -48,15 +28,26 @@ export interface CandidateSignupFormData {
   agreeToTerms: boolean;
 }
 
+export interface OrganisationSignupFormData {
+  companyName: string;
+  websiteUrl: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export interface LoginFormData {
   email: string;
   password: string;
   rememberMe?: boolean;
 }
 
-export interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  isAuthenticated: boolean;
-  userProfile: Candidate | Organization | null;
+export interface ResetPasswordFormData {
+  email: string;
+}
+
+export interface ConfirmPasswordResetFormData {
+  oobCode: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }
