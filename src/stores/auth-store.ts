@@ -4,7 +4,6 @@ import { onAuthStateChange, signOutUser } from "@/lib/firebase/auth";
 import { getDocument } from "@/lib/firebase/firestore";
 import type { Candidate, Organization } from "@/types/auth";
 
-// Extend Window interface to include our global variable
 declare global {
   interface Window {
     __authUnsubscribe?: () => void;
@@ -51,14 +50,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       error: null,
     });
 
-    // Keep loading true until profile is fetched
     get().fetchUserProfile(user.uid);
   },
 
   setUserProfile: (profile: Candidate | Organization | null) => {
     set({
       userProfile: profile,
-      loading: false, // Only set loading to false once profile is set
+      loading: false,
     });
   },
 
@@ -76,16 +74,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   fetchUserProfile: async (uid: string) => {
     try {
-      // Try to fetch from candidates collection first
       let profile = await getDocument("candidates", uid);
 
       if (!profile) {
-        // If not found in candidates, try organizations
         profile = await getDocument("organizations", uid);
       }
 
       if (profile) {
-        // Convert Firestore timestamp to Date and add uid
         const userProfile = {
           ...profile,
           uid: profile.id,
@@ -97,12 +92,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         get().setUserProfile(userProfile);
       } else {
-        // If no profile found, set loading to false
         set({ loading: false });
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
-      // Set loading to false on error
       set({ loading: false });
     }
   },
@@ -110,7 +103,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initializeAuth: () => {
     const { initialized } = get();
 
-    // Only initialize once
     if (initialized) return;
 
     set({ loading: true, initialized: true });
@@ -144,13 +136,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
-// Auto-initialize auth when the store is first accessed
 let isInitialized = false;
 
 export const useAuthStoreWithInit = () => {
   const store = useAuthStore();
 
-  // Initialize auth on first use
   if (!isInitialized) {
     isInitialized = true;
     store.initializeAuth();

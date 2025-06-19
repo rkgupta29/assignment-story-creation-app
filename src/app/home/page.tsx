@@ -1,14 +1,25 @@
-import { AuthStatus } from "@/components/auth/AuthStatus";
-import { ShouldBeAuthenticated } from "@/lib/guards/ShouldBeAuthenticated";
+"use client";
+
+import CandidateDashboard from "@/components/candiadates/dashboard";
+import OrganizationDashboard from "@/components/organizations/dashboard";
+import { useAuthStoreWithInit } from "@/stores/auth-store";
+import { notFound } from "next/navigation";
 import React from "react";
 
 export default function DashboardPage() {
-  return (
-    <ShouldBeAuthenticated>
-      <div>
-        <AuthStatus />
-        <h1>this is the homepage for the user</h1>
-      </div>
-    </ShouldBeAuthenticated>
-  );
+  const { userProfile, loading } = useAuthStoreWithInit();
+
+  if (loading) return <div>Loading...</div>;
+
+  if (!userProfile) return notFound();
+
+  if (userProfile?.userType === "candidate") {
+    return <CandidateDashboard />;
+  }
+
+  if (userProfile?.userType === "organization") {
+    return <OrganizationDashboard />;
+  }
+
+  return notFound();
 }
