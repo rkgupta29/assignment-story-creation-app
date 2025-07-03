@@ -1,3 +1,5 @@
+import { CandidateProfile } from "./profile";
+
 export type UserType = "candidate" | "organization";
 
 export interface BaseUser {
@@ -12,6 +14,7 @@ export interface BaseUser {
 export interface Candidate extends BaseUser {
   userType: "candidate";
   fullName: string;
+  profile?: CandidateProfile;
 }
 
 export interface Organization extends BaseUser {
