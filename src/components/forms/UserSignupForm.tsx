@@ -42,6 +42,8 @@ export function UserSignupForm() {
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
+    setValue,
   } = useForm<SignupSchema>({
     resolver: zodResolver(signupSchema),
   });
@@ -215,7 +217,12 @@ export function UserSignupForm() {
             </div>
 
             <div className="flex items-center">
-              <Checkbox {...register("agreeToTerms")} />
+              <Checkbox
+                checked={watch("agreeToTerms") || false}
+                onCheckedChange={(checked) =>
+                  setValue("agreeToTerms", !!checked)
+                }
+              />
               <Label htmlFor="agreeToTerms" className="ml-2 text-sm">
                 I agree to the{" "}
                 <Link

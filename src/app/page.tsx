@@ -1,7 +1,13 @@
+import Sidebar from "@/components/Sidebar";
+import { ShouldBeAuthenticated } from "@/lib/guards/ShouldBeAuthenticated";
+import DashboardContent from "./dashboard";
+
 export default function Home() {
   return (
-    <div className="text-4xl font-pp">
-      <h1>welcome to the dashboard page </h1>
-    </div>
+    <ShouldBeAuthenticated>
+      <Sidebar>
+        <DashboardContent />
+      </Sidebar>
+    </ShouldBeAuthenticated>
   );
 }

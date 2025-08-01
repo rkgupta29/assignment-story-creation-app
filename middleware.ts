@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/home", "/dashboard", "/profile"];
+const protectedRoutes = ["/", "/dashboard", "/profile"];
 
 const publicRoutes = [
   "/login",
@@ -32,7 +32,7 @@ export function middleware(request: NextRequest) {
 
   if (isPublicRoute && token && pathname !== "/") {
     if (pathname !== "/") {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

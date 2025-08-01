@@ -35,7 +35,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/home";
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),

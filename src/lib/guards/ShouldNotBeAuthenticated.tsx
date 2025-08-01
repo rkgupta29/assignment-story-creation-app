@@ -12,7 +12,7 @@ interface ShouldNotBeAuthenticatedProps {
 
 export function ShouldNotBeAuthenticated({
   children,
-  redirectTo = "/home",
+  redirectTo = "/",
 }: ShouldNotBeAuthenticatedProps) {
   const { loading, isAuthenticated } = useAuthStoreWithInit();
   const router = useRouter();

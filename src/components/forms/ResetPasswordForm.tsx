@@ -82,7 +82,7 @@ export function ResetPasswordForm() {
       setSuccess(true);
 
       setTimeout(() => {
-        router.push("/home");
+        router.push("/");
       }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -110,10 +110,7 @@ export function ResetPasswordForm() {
             </div>
 
             <div className="text-center">
-              <Link
-                href="/home"
-                className="text-sm text-primary hover:underline"
-              >
+              <Link href="/" className="text-sm text-primary hover:underline">
                 Go to home page now
               </Link>
             </div>
