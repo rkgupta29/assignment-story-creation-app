@@ -89,11 +89,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         get().setUserProfile(user);
       } else {
-        set({ loading: false });
+        set({ loading: false, error: "Profile not found" });
       }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      set({ loading: false });
+    } catch {
+      set({ loading: false, error: "Failed to load profile" });
     }
   },
 

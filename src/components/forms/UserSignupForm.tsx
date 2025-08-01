@@ -93,11 +93,11 @@ export function UserSignupForm() {
               Account Created Successfully!
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Please check your email to verify your account.
+              Your account has been created successfully.
             </p>
             <Link
               href="/login"
-              className="mt-4 inline-block text-sm text-blue-600 hover:text-blue-500"
+              className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               Sign in to your account
             </Link>
