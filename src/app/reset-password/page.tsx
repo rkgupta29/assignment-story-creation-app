@@ -1,12 +1,12 @@
 import { ShouldNotBeAuthenticated } from "@/lib/guards/ShouldNotBeAuthenticated";
-import { ResetPasswordForm } from "@/components/forms/ResetPasswordForm";
 import AuthLayoutWrapper from "@/components/auth/AuthLayoutWrapper";
+import UpcomingFeature from "@/components/UpcomingFeature";
 
 export default function ResetPasswordPage() {
   return (
     <ShouldNotBeAuthenticated>
       <AuthLayoutWrapper>
-        <ResetPasswordForm />
+        <UpcomingFeature />
       </AuthLayoutWrapper>
     </ShouldNotBeAuthenticated>
   );

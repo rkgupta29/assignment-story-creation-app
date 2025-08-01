@@ -1,43 +1,18 @@
-import { CandidateProfile } from "./profile";
-
-export type UserType = "candidate" | "organization";
-
-export interface BaseUser {
+export interface User {
   uid: string;
   email: string;
-  userType: UserType;
+  name: string;
   createdAt: Date;
   updatedAt: Date;
   emailVerified: boolean;
 }
 
-export interface Candidate extends BaseUser {
-  userType: "candidate";
-  fullName: string;
-  profile?: CandidateProfile;
-}
-
-export interface Organization extends BaseUser {
-  userType: "organization";
-  companyName: string;
-  websiteUrl: string;
-  companyDescription?: string;
-}
-
-export interface CandidateSignupFormData {
-  fullName: string;
+export interface SignupFormData {
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
   agreeToTerms: boolean;
-}
-
-export interface OrganisationSignupFormData {
-  companyName: string;
-  websiteUrl: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
 }
 
 export interface LoginFormData {

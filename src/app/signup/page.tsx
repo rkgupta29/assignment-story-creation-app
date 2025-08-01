@@ -1,9 +1,10 @@
+import React from "react";
+import { UserSignupForm } from "@/components/forms/UserSignupForm";
+import { ShouldNotBeAuthenticated } from "@/lib/guards/ShouldNotBeAuthenticated";
 import BrandLogo from "@/components/BrandLogo";
 import Image from "next/image";
-import { LoginForm } from "@/components/forms/LoginForm";
-import { ShouldNotBeAuthenticated } from "@/lib/guards/ShouldNotBeAuthenticated";
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <ShouldNotBeAuthenticated>
       <div className=" min-h-screen grid">
@@ -26,7 +27,7 @@ export default function LoginPage() {
             </div>
           </div>
           <div className="col-span-4">
-            <LoginForm />
+            <UserSignupForm />
           </div>
         </div>
       </div>

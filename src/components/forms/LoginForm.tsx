@@ -125,14 +125,6 @@ export function LoginForm() {
                       />
                     </FormControl>
                     <FormMessage />
-                    <div className="flex justify-end">
-                      <Link
-                        href="/forgot-password"
-                        className="text-sm text-primary hover:underline"
-                      >
-                        Forgot your password?
-                      </Link>
-                    </div>
                   </FormItem>
                 )}
               />
@@ -165,30 +157,19 @@ export function LoginForm() {
               </Button>
             </form>
           </Form>
-
-          <div className="mt-4 bg-white border border-background/10 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 text-center">
-              Don&apos;t have an account?{" "}
-            </p>
-            <div className="mt-2 text-center flex items-center justify-center gap-2">
-              <Link
-                href="/signup/candidates"
-                className="text-primary hover:underline font-medium text-sm"
-              >
-                Sign up as candidate
-              </Link>
-              <span className="text-lg text-gray-600">or</span>
-              <p className="text-sm text-gray-600">
-                <Link
-                  href="/signup/organization"
-                  className="text-primary hover:underline font-medium text-sm"
-                >
-                  Sign up as organization
-                </Link>
-              </p>
-            </div>
-          </div>
         </CardContent>
+
+        <div className="text-center">
+          <span className="text-sm text-gray-600">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Sign up
+            </Link>
+          </span>
+        </div>
       </Card>
     </div>
   );

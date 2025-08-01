@@ -20,8 +20,7 @@ export default function AuthLayoutWrapper({
             <BrandLogo height={60} width={60} />
             <div className="w-9/12">
               <span className="text-2xl text-background font-pp font-semibold leading-normal">
-                Welcome to a platform where people hire people - not algorithms.
-                Because you deserve to be seen, not scanned.
+                Welcome to the Authentication page. This is a dummy text
               </span>
             </div>
           </div>

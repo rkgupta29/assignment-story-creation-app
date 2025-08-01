@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { User } from "firebase/auth";
+import { User as FirebaseUser } from "firebase/auth";
 import { onAuthStateChange, signOutUser } from "@/lib/firebase/auth";
 import { getDocument } from "@/lib/firebase/firestore";
-import type { Candidate, Organization } from "@/types/auth";
+import type { User } from "@/types/auth";
 
 declare global {
   interface Window {
@@ -11,13 +11,13 @@ declare global {
 }
 
 interface AuthState {
-  userProfile: Candidate | Organization | null;
+  user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
   error: string | null;
   initialized: boolean;
-  setUser: (user: User | null) => void;
-  setUserProfile: (profile: Candidate | Organization | null) => void;
+  setUser: (user: FirebaseUser | null) => void;
+  setUserProfile: (profile: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   signOut: () => Promise<void>;
@@ -28,19 +28,18 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  userProfile: null,
   loading: true,
   isAuthenticated: false,
   error: null,
   initialized: false,
 
-  setUser: (user: User | null) => {
-    if (!user) {
+  setUser: (firebaseUser: FirebaseUser | null) => {
+    if (!firebaseUser) {
       set({
         isAuthenticated: false,
         loading: false,
         error: null,
-        userProfile: null,
+        user: null,
       });
       return;
     }
@@ -50,12 +49,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       error: null,
     });
 
-    get().fetchUserProfile(user.uid);
+    get().fetchUserProfile(firebaseUser.uid);
   },
 
-  setUserProfile: (profile: Candidate | Organization | null) => {
+  setUserProfile: (profile: User | null) => {
     set({
-      userProfile: profile,
+      user: profile,
       loading: false,
     });
   },
@@ -74,23 +73,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   fetchUserProfile: async (uid: string) => {
     try {
-      let profile = await getDocument("candidates", uid);
-
-      if (!profile) {
-        profile = await getDocument("organizations", uid);
-      }
+      const profile = await getDocument("users", uid);
 
       if (profile) {
-        const userProfile = {
-          ...profile,
-          uid: profile.id,
+        const user = {
+          uid: profile.id || uid,
+          email: profile.email,
+          name: profile.name,
+          emailVerified: profile.emailVerified || false,
           createdAt:
             profile.createdAt?.toDate?.() || new Date(profile.createdAt),
           updatedAt:
             profile.updatedAt?.toDate?.() || new Date(profile.updatedAt),
-        } as unknown as Candidate | Organization;
+        } as User;
 
-        get().setUserProfile(userProfile);
+        get().setUserProfile(user);
       } else {
         set({ loading: false });
       }
@@ -126,7 +123,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      set({ loading: false, userProfile: null });
+      set({ loading: false, user: null });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Failed to sign out",

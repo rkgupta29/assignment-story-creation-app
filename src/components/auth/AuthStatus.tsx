@@ -4,8 +4,14 @@ import { useAuthStoreWithInit } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 
 export function AuthStatus() {
-  const { userProfile, loading, isAuthenticated, error, clearError, signOut } =
-    useAuthStoreWithInit();
+  const {
+    user: userProfile,
+    loading,
+    isAuthenticated,
+    error,
+    clearError,
+    signOut,
+  } = useAuthStoreWithInit();
 
   if (loading) {
     return <div className="p-4">Loading authentication...</div>;
@@ -14,7 +20,6 @@ export function AuthStatus() {
   if (!isAuthenticated) {
     return <div className="p-4">No user</div>;
   }
-  console.log(userProfile);
 
   return (
     <div className="p-4 space-y-4">
@@ -24,40 +29,19 @@ export function AuthStatus() {
         {userProfile ? (
           <div className="p-3 bg-blue-50 rounded-md">
             <h4 className="font-medium text-sm text-blue-700 mb-2">
-              Profile Data ({userProfile.userType}):
+              Profile Data ({userProfile.email}):
             </h4>
 
-            {userProfile.userType === "candidate" && (
-              <div className="space-y-1">
-                <p className="text-sm">Full Name: {userProfile.fullName}</p>
-                <p className="text-sm">
-                  Created: {userProfile.createdAt.toDateString()}
-                </p>
-                <p>{userProfile.userType}</p>
-                <p>{userProfile.emailVerified ? "Verified" : "Not Verified"}</p>
-              </div>
-            )}
-
-            {userProfile.userType === "organization" && (
-              <div className="space-y-1">
-                <p className="text-sm">
-                  Organization Name: {userProfile.companyName}
-                </p>
-                <p className="text-sm">Website: {userProfile.websiteUrl}</p>
-                {userProfile.companyDescription && (
-                  <p className="text-sm">
-                    Description: {userProfile.companyDescription}
-                  </p>
-                )}
-                <p className="text-sm">
-                  Created: {userProfile.createdAt.toDateString()}
-                </p>
-                <p className="text-sm">
-                  Updated: {userProfile.updatedAt.toDateString()}
-                </p>
-                <p>{userProfile.userType}</p>
-              </div>
-            )}
+            <div className="space-y-1">
+              <p className="text-sm">Organization Name: {userProfile.name}</p>
+              <p className="text-sm">
+                Created: {userProfile.createdAt.toDateString()}
+              </p>
+              <p className="text-sm">
+                Updated: {userProfile.updatedAt.toDateString()}
+              </p>
+              <p>{userProfile.email}</p>
+            </div>
           </div>
         ) : (
           <div className="p-3 bg-yellow-50 rounded-md">
