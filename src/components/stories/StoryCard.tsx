@@ -113,7 +113,7 @@ export function StoryCard({ story }: StoryCardProps) {
   };
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+    <Card className="h-full hover:shadow-lg transition-shadow duration-200 flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -162,7 +162,7 @@ export function StoryCard({ story }: StoryCardProps) {
         </Link>
       </CardHeader>
 
-      <CardContent className="pb-4">
+      <CardContent className="pb-4 flex-1">
         {story.type === StoryType.TEXT ? (
           <div className="text-gray-600 line-clamp-3 max-h-20 overflow-hidden">
             <StoryContentRenderer
@@ -173,7 +173,7 @@ export function StoryCard({ story }: StoryCardProps) {
         ) : (
           <div className="space-y-3">
             {story.audioUrl && (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-md">
+              <div className="flex items-center gap-3 py-3 bg-gray-50 rounded-md">
                 <Button
                   variant="outline"
                   size="sm"

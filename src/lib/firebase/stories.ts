@@ -6,7 +6,7 @@ import {
   deleteDocument,
   updateDocument,
 } from "./firestore";
-import { uploadAudioFile } from "./storage";
+import { uploadAudioFileToCloudinary } from "../cloudinary/client";
 import { Story, CreateStoryFormData, StoryUpdateData } from "../../types/story";
 
 const COLLECTION_NAME = "stories";
@@ -35,7 +35,7 @@ const removeUndefinedFields = (
   return cleanedObj;
 };
 
-// Create story with improved audio handling
+// Create story with Cloudinary audio handling
 export const createStory = async (
   storyData: CreateStoryFormData,
   authorId: string,
@@ -46,24 +46,46 @@ export const createStory = async (
     const now = new Date();
     const slug = generateSlug(storyData.title);
     let audioUrl: string | undefined;
+    let audioPublicId: string | undefined;
 
     // Handle audio file upload if provided
     if (storyData.audioFile && storyData.type === "voice") {
+      console.log("Starting Cloudinary audio upload:", {
+        fileName: storyData.audioFile.name,
+        fileType: storyData.audioFile.type,
+        fileSize: storyData.audioFile.size,
+        title: storyData.title,
+      });
+
       try {
-        const uploadResult = await uploadAudioFile(
+        const uploadResult = await uploadAudioFileToCloudinary(
           storyData.audioFile,
           authorId,
           storyData.title,
           onProgress
         );
-        audioUrl = uploadResult.url;
+        audioUrl = uploadResult.secure_url;
+        audioPublicId = uploadResult.public_id;
+
+        console.log("Cloudinary audio upload successful:", {
+          url: audioUrl,
+          publicId: audioPublicId,
+          format: uploadResult.format,
+          size: uploadResult.bytes,
+          duration: uploadResult.duration,
+        });
       } catch (uploadError) {
-        console.error("Error uploading audio file:", uploadError);
-        throw new Error(
-          `Audio upload failed: ${
-            uploadError instanceof Error ? uploadError.message : "Unknown error"
-          }`
-        );
+        console.error("Error uploading audio file to Cloudinary:", uploadError);
+
+        // Provide more specific error messages
+        let errorMessage = "Audio upload failed";
+        if (uploadError instanceof Error) {
+          errorMessage = uploadError.message;
+        } else if (typeof uploadError === "string") {
+          errorMessage = uploadError;
+        }
+
+        throw new Error(`Audio upload failed: ${errorMessage}`);
       }
     }
 
@@ -78,9 +100,12 @@ export const createStory = async (
       updatedAt: now,
     };
 
-    // Only add audioUrl and audioTranscript if they're not undefined
+    // Only add audio fields if they exist
     if (audioUrl) {
       story.audioUrl = audioUrl;
+    }
+    if (audioPublicId) {
+      story.audioPublicId = audioPublicId;
     }
     if (storyData.audioTranscript) {
       story.audioTranscript = storyData.audioTranscript;
@@ -89,7 +114,17 @@ export const createStory = async (
     // Remove any remaining undefined fields before saving to Firestore
     const cleanStory = removeUndefinedFields(story);
 
+    console.log("Creating story document:", {
+      title: cleanStory.title,
+      type: cleanStory.type,
+      hasAudioUrl: !!cleanStory.audioUrl,
+      hasAudioPublicId: !!cleanStory.audioPublicId,
+      hasTranscript: !!cleanStory.audioTranscript,
+    });
+
     const docId = await addDocument(COLLECTION_NAME, cleanStory);
+    console.log("Story created successfully:", docId);
+
     return docId;
   } catch (error) {
     console.error("Error creating story:", error);

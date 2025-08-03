@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,8 @@ import {
   Trash2,
   Download,
 } from "lucide-react";
+import { testAudioFormats, testBrowserCapabilities } from "@/utils/audio-test";
+import { runCloudinaryTests } from "@/utils/cloudinary-test";
 
 interface VoiceRecorderProps {
   onAudioReady: (audioFile: File) => void;
@@ -36,6 +38,22 @@ export function VoiceRecorder({
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Run diagnostics on component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log("VoiceRecorder: Running diagnostics...");
+
+      // Test browser capabilities
+      testBrowserCapabilities();
+
+      // Test audio format support
+      testAudioFormats();
+
+      // Test Cloudinary configuration (async)
+      runCloudinaryTests().catch(console.error);
+    }
+  }, []);
+
   const getSupportedMimeType = () => {
     const types = [
       "audio/webm;codecs=opus",
@@ -43,17 +61,22 @@ export function VoiceRecorder({
       "audio/ogg;codecs=opus",
       "audio/ogg",
       "audio/mp4",
-      "audio/mp3",
       "audio/mpeg",
       "audio/wav",
     ];
 
+    console.log("Checking supported MIME types...");
+
     for (const type of types) {
-      if (MediaRecorder.isTypeSupported(type)) {
+      const isSupported = MediaRecorder.isTypeSupported(type);
+      console.log(`${type}: ${isSupported ? "supported" : "not supported"}`);
+      if (isSupported) {
+        console.log(`Selected MIME type: ${type}`);
         return type;
       }
     }
 
+    console.log("No supported MIME type found, using fallback: audio/webm");
     return "audio/webm"; // Fallback
   };
 
@@ -104,6 +127,10 @@ export function VoiceRecorder({
             type: mimeType,
           }
         );
+
+        // Test the recorded file before passing it on
+        console.log("Testing recorded file:");
+        runCloudinaryTests(file);
 
         onAudioReady(file);
 
@@ -162,19 +189,38 @@ export function VoiceRecorder({
   }, [audioUrl, isPlaying]);
 
   const handleFileUpload = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
-        // Check if it's an audio file
-        if (!file.type.startsWith("audio/")) {
-          setError("Please select a valid audio file.");
+        console.log("File selected for upload:");
+
+        // Run Cloudinary-specific file validation
+        const cloudinaryTest = await runCloudinaryTests(file);
+
+        if (!cloudinaryTest.validation?.isValid) {
+          if (!cloudinaryTest.validation?.type.valid) {
+            setError(
+              `Please select a valid audio file. Detected format: ${cloudinaryTest.validation?.type.detected}`
+            );
+          } else if (!cloudinaryTest.validation?.size.valid) {
+            setError(
+              `File too large. Size: ${cloudinaryTest.validation?.size.mb.toFixed(
+                2
+              )}MB (max: ${cloudinaryTest.validation?.size.maxMb}MB)`
+            );
+          }
           return;
         }
 
-        // Check file size (max 50MB)
-        const maxSize = 50 * 1024 * 1024; // 50MB
-        if (file.size > maxSize) {
-          setError("File too large. Maximum size is 50MB.");
+        // Check if Cloudinary is properly configured
+        if (!cloudinaryTest.config.isAvailable) {
+          setError(
+            "Cloudinary is not properly configured. Please check your environment variables."
+          );
+          console.error(
+            "Cloudinary configuration issue:",
+            cloudinaryTest.config
+          );
           return;
         }
 

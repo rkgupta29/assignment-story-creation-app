@@ -11,10 +11,11 @@ export interface Story {
   authorId: string;
   authorName: string;
   slug: string;
-  audioUrl?: string;
-  audioTranscript?: string;
   createdAt: Date;
   updatedAt: Date;
+  audioUrl?: string; // Keep for compatibility
+  audioPublicId?: string; // Cloudinary public ID for audio files
+  audioTranscript?: string;
 }
 
 export interface CreateStoryFormData {
@@ -28,6 +29,5 @@ export interface CreateStoryFormData {
 export interface StoryUpdateData {
   title?: string;
   content?: string;
-  audioUrl?: string;
   audioTranscript?: string;
 }

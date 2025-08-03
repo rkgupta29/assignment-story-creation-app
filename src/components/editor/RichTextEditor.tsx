@@ -89,6 +89,11 @@ export function RichTextEditor({
           keepMarks: true,
           keepAttributes: false,
         },
+        // Disable these in StarterKit since we're loading them separately
+        link: false,
+        codeBlock: false,
+        blockquote: false,
+        horizontalRule: false,
       }),
       TextStyle,
       Color.configure({

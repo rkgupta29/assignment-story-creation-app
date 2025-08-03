@@ -153,8 +153,8 @@ export const uploadAudioFile = async (
   onProgress?: (progress: number) => void
 ): Promise<{ url: string; ref: StorageReference }> => {
   try {
-    // Validate file type
-    const allowedTypes = [
+    // Validate file type - handle both base types and codec specifications
+    const allowedBaseTypes = [
       "audio/mpeg",
       "audio/mp3",
       "audio/wav",
@@ -165,9 +165,12 @@ export const uploadAudioFile = async (
       "audio/aac",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    // Extract base MIME type (remove codec specifications)
+    const baseMimeType = file.type.split(";")[0].toLowerCase();
+
+    if (!allowedBaseTypes.includes(baseMimeType)) {
       throw new Error(
-        `Unsupported audio format: ${file.type}. Please use MP3, WAV, OGG, WebM, MP4, or M4A.`
+        `Unsupported audio format: ${baseMimeType}. Please use MP3, WAV, OGG, WebM, MP4, or M4A.`
       );
     }
 

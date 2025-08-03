@@ -16,6 +16,7 @@ import { getStoryBySlug, updateStory } from "@/lib/firebase/stories";
 import { useAuthStore } from "@/stores/auth-store";
 import { useStoryStore } from "@/stores/story-store";
 import Link from "next/link";
+import Sidebar from "@/components/Sidebar";
 
 const editStorySchema = z.object({
   title: z
@@ -165,100 +166,106 @@ export default function EditStoryPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <StoryContentStyles />
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <Link href={`/stories/${story.slug}`}>
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Story
-            </Button>
-          </Link>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Story</h1>
-        <p className="text-gray-600">
-          Make changes to your {story.type.toLowerCase()} story
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {error && (
-          <div className="flex items-center p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            <span>{error}</span>
+    <Sidebar>
+      <div className="max-w-4xl mx-auto p-6">
+        <StoryContentStyles />
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Link href={`/stories/${story.slug}`}>
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Story
+              </Button>
+            </Link>
           </div>
-        )}
-
-        {/* Title Field */}
-        <div className="space-y-2">
-          <Label htmlFor="title">Story Title</Label>
-          <Input
-            {...register("title")}
-            type="text"
-            placeholder="Enter a compelling title for your story"
-            className="text-lg"
-          />
-          {errors.title && (
-            <p className="text-sm text-red-600">{errors.title.message}</p>
-          )}
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Story</h1>
+          <p className="text-gray-600">
+            Make changes to your {story.type.toLowerCase()} story
+          </p>
         </div>
 
-        {/* Content Field */}
-        <div className="space-y-2">
-          <Label className="text-base font-medium">
-            {story.type === StoryType.TEXT ? "Story Content" : "Transcript"}
-          </Label>
-
-          {story.type === StoryType.TEXT ? (
-            <RichTextEditor
-              value={watchedContent}
-              onChange={(content) => setValue("content", content)}
-              placeholder="Start writing your story..."
-              className="min-h-[300px]"
-            />
-          ) : (
-            <div className="space-y-4">
-              {story.audioUrl && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Original Audio
-                  </Label>
-                  <audio controls className="w-full">
-                    <source src={story.audioUrl} type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                  </audio>
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label>Edit Transcript</Label>
-                <RichTextEditor
-                  value={watchedContent}
-                  onChange={(content) => setValue("content", content)}
-                  placeholder="Edit the transcript..."
-                  className="min-h-[200px]"
-                />
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {error && (
+            <div className="flex items-center p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              <span>{error}</span>
             </div>
           )}
 
-          {errors.content && (
-            <p className="text-sm text-red-600">{errors.content.message}</p>
-          )}
-        </div>
+          {/* Title Field */}
+          <div className="space-y-2">
+            <Label htmlFor="title">Story Title</Label>
+            <Input
+              {...register("title")}
+              type="text"
+              placeholder="Enter a compelling title for your story"
+              className="text-lg"
+            />
+            {errors.title && (
+              <p className="text-sm text-red-600">{errors.title.message}</p>
+            )}
+          </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end gap-4 pt-6">
-          <Link href={`/stories/${story.slug}`}>
-            <Button type="button" variant="outline" disabled={isLoading}>
-              Cancel
+          {/* Content Field */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">
+              {story.type === StoryType.TEXT ? "Story Content" : "Transcript"}
+            </Label>
+
+            {story.type === StoryType.TEXT ? (
+              <RichTextEditor
+                value={watchedContent}
+                onChange={(content) => setValue("content", content)}
+                placeholder="Start writing your story..."
+                className="min-h-[300px]"
+              />
+            ) : (
+              <div className="space-y-4">
+                {story.audioUrl && (
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                      Original Audio
+                    </Label>
+                    <audio controls className="w-full">
+                      <source src={story.audioUrl} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label>Edit Transcript</Label>
+                  <RichTextEditor
+                    value={watchedContent}
+                    onChange={(content) => setValue("content", content)}
+                    placeholder="Edit the transcript..."
+                    className="min-h-[200px]"
+                  />
+                </div>
+              </div>
+            )}
+
+            {errors.content && (
+              <p className="text-sm text-red-600">{errors.content.message}</p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end gap-4 pt-6">
+            <Link href={`/stories/${story.slug}`}>
+              <Button type="button" variant="outline" disabled={isLoading}>
+                Cancel
+              </Button>
+            </Link>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="min-w-[120px]"
+            >
+              {isLoading ? "Saving..." : "Save Changes"}
             </Button>
-          </Link>
-          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      </form>
-    </div>
+          </div>
+        </form>
+      </div>
+    </Sidebar>
   );
 }
