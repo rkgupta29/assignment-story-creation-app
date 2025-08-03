@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Home, LogOut, User } from "lucide-react";
+import { Home, LogOut, User, Plus, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -11,7 +11,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden">
       <aside className="w-64 min-h-screen bg-gray-100 p-4 flex flex-col">
-        <nav className="flex-1">
+        <nav className="flex-1 space-y-2">
           <Link
             href="/"
             className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded"
@@ -19,6 +19,27 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <Home size={20} />
             <span>Home</span>
           </Link>
+
+          <Link
+            href="/stories/create"
+            className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded text-blue-600 hover:bg-blue-50"
+          >
+            <Plus size={20} />
+            <span>Create Story</span>
+          </Link>
+
+          <div className="pt-2 border-t border-gray-300">
+            <p className="text-xs uppercase text-gray-500 font-medium mb-2 px-2">
+              Stories
+            </p>
+            <Link
+              href="/"
+              className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded"
+            >
+              <BookOpen size={20} />
+              <span>All Stories</span>
+            </Link>
+          </div>
         </nav>
 
         <div className="border-t border-gray-200 pt-4">

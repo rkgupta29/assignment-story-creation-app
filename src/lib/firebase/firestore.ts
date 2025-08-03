@@ -21,11 +21,33 @@ import {
   Unsubscribe,
   Transaction,
   WhereFilterOp,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "./config";
 
 // Generic type for document data
 export type DocumentWithId<T> = T & { id: string };
+
+// Helper function to convert Firestore timestamps to Date objects
+const convertTimestampsToDate = (data: unknown): unknown => {
+  if (!data || typeof data !== "object") {
+    return data;
+  }
+
+  if (data instanceof Timestamp) {
+    return data.toDate();
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(convertTimestampsToDate);
+  }
+
+  const converted: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+    converted[key] = convertTimestampsToDate(value);
+  }
+  return converted;
+};
 
 // Collection reference helper
 export const getCollectionRef = (collectionName: string) => {
@@ -47,7 +69,8 @@ export const getDocument = async <T extends DocumentData>(
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as DocumentWithId<T>;
+      const data = convertTimestampsToDate(docSnap.data()) as T;
+      return { id: docSnap.id, ...data } as DocumentWithId<T>;
     }
     return null;
   } catch (error) {
@@ -66,10 +89,13 @@ export const getDocuments = async <T extends DocumentData>(
     const q = query(collectionRef, ...constraints);
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as DocumentWithId<T>[];
+    return querySnapshot.docs.map((doc) => {
+      const data = convertTimestampsToDate(doc.data()) as T;
+      return {
+        id: doc.id,
+        ...data,
+      } as DocumentWithId<T>;
+    });
   } catch (error) {
     console.error("Error getting documents:", error);
     throw error;
@@ -144,7 +170,8 @@ export const subscribeToDocument = <T extends DocumentData>(
   const docRef = getDocumentRef(collectionName, documentId);
   return onSnapshot(docRef, (doc) => {
     if (doc.exists()) {
-      callback({ id: doc.id, ...doc.data() } as DocumentWithId<T>);
+      const data = convertTimestampsToDate(doc.data()) as T;
+      callback({ id: doc.id, ...data } as DocumentWithId<T>);
     } else {
       callback(null);
     }
@@ -160,10 +187,13 @@ export const subscribeToDocuments = <T extends DocumentData>(
   const collectionRef = getCollectionRef(collectionName);
   const q = query(collectionRef, ...constraints);
   return onSnapshot(q, (querySnapshot) => {
-    const documents = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as DocumentWithId<T>[];
+    const documents = querySnapshot.docs.map((doc) => {
+      const data = convertTimestampsToDate(doc.data()) as T;
+      return {
+        id: doc.id,
+        ...data,
+      } as DocumentWithId<T>;
+    });
     callback(documents);
   });
 };

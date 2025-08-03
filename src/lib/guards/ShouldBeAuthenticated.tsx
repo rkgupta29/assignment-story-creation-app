@@ -24,7 +24,7 @@ export function ShouldBeAuthenticated({
   }, [loading, isAuthenticated, router, redirectTo]);
 
   if (loading) {
-    return <FullPageLoader text="Loading..." direction="bottom" />;
+    return <FullPageLoader text="Loading. Please wait." direction="bottom" />;
   }
 
   if (!isAuthenticated) {

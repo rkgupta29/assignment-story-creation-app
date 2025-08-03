@@ -1,0 +1,212 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  Play,
+  Pause,
+  Calendar,
+  User,
+  FileText,
+  Mic,
+} from "lucide-react";
+import { Story, StoryType } from "@/types/story";
+import { getStoryBySlug } from "@/lib/firebase/stories";
+import {
+  StoryContentRenderer,
+  StoryContentStyles,
+} from "@/components/stories/StoryContentRenderer";
+
+export default function StoryPage() {
+  const params = useParams();
+  const router = useRouter();
+  const slug = params.slug as string;
+
+  const [story, setStory] = useState<Story | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const fetchStory = async () => {
+      if (!slug) return;
+
+      try {
+        setLoading(true);
+        const fetchedStory = await getStoryBySlug(slug);
+
+        if (fetchedStory) {
+          setStory(fetchedStory);
+        } else {
+          setError("Story not found");
+        }
+      } catch (err) {
+        console.error("Error fetching story:", err);
+        setError("Failed to load story");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStory();
+  }, [slug]);
+
+  const handlePlayPause = () => {
+    if (story?.type === StoryType.VOICE && story.audioUrl) {
+      if (isPlaying) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current?.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(date));
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading story...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !story) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            {error || "Story not found"}
+          </h1>
+          <Button onClick={() => router.push("/")} variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to All Stories
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <StoryContentStyles />
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            onClick={() => router.push("/")}
+            variant="ghost"
+            className="mb-6"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+            {/* Story Type Badge */}
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+              {story.type === StoryType.TEXT ? (
+                <FileText className="h-4 w-4" />
+              ) : (
+                <Mic className="h-4 w-4" />
+              )}
+              <span className="capitalize">{story.type} Story</span>
+              <span className="text-gray-300">•</span>
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                <span>{formatDate(story.createdAt)}</span>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+              {story.title}
+            </h1>
+
+            {/* Author */}
+            <div className="flex items-center gap-2 text-gray-600 mb-6">
+              <User className="h-5 w-5" />
+              <span className="text-lg">by {story.authorName}</span>
+            </div>
+
+            {/* Audio Player (for voice stories) */}
+            {story.type === StoryType.VOICE && story.audioUrl && (
+              <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-4 mb-4">
+                  <Button
+                    onClick={handlePlayPause}
+                    className="flex items-center gap-2"
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-5 w-5" />
+                    ) : (
+                      <Play className="h-5 w-5" />
+                    )}
+                    {isPlaying ? "Pause Audio" : "Play Audio"}
+                  </Button>
+                  <span className="text-sm text-gray-600">
+                    Listen to the full audio story
+                  </span>
+                </div>
+
+                <audio
+                  ref={audioRef}
+                  src={story.audioUrl}
+                  onEnded={() => setIsPlaying(false)}
+                  className="w-full"
+                  controls
+                />
+              </div>
+            )}
+
+            {/* Content */}
+            <div className="mt-8">
+              {story.type === StoryType.TEXT ? (
+                <StoryContentRenderer
+                  content={story.content}
+                  className="text-gray-800 leading-relaxed"
+                />
+              ) : (
+                <div>
+                  {story.audioTranscript && (
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                        Transcript
+                      </h3>
+                      <StoryContentRenderer
+                        content={story.audioTranscript}
+                        className="text-gray-700 leading-relaxed"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 flex justify-center">
+          <Button onClick={() => router.push("/")} variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to All Stories
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
