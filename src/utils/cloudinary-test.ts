@@ -1,6 +1,5 @@
 import { isCloudinaryAvailable } from "../lib/cloudinary/client";
 
-// Test Cloudinary configuration (async version for client-side)
 export const testCloudinaryConfig = async () => {
   console.log("=== Cloudinary Configuration Test ===");
 
@@ -31,7 +30,6 @@ export const testCloudinaryConfig = async () => {
   }
 };
 
-// Test file validation (client-side only)
 export const testFileValidation = (file: File) => {
   console.log("=== File Validation Test ===");
 
@@ -49,7 +47,7 @@ export const testFileValidation = (file: File) => {
 
   const baseMimeType = file.type.split(";")[0].toLowerCase();
   const isValidType = audioMimeTypes.includes(baseMimeType);
-  const maxSize = 50 * 1024 * 1024; // 50MB
+  const maxSize = 50 * 1024 * 1024;
   const isValidSize = file.size <= maxSize && file.size > 0;
 
   console.log("File name:", file.name);
@@ -96,13 +94,11 @@ export const testFileValidation = (file: File) => {
   };
 };
 
-// Generate test file info for debugging
 export const generateTestFileInfo = (file: File) => {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 15);
   const fileExtension = file.name.split(".").pop() || "audio";
 
-  // Simulate the path generation logic
   const testAuthorId = "test-author-123";
   const testStoryTitle = "Test Story Title";
   const sanitizedTitle = testStoryTitle
@@ -120,41 +116,24 @@ export const generateTestFileInfo = (file: File) => {
   console.log("Full path:", fullPath);
   console.log("File extension:", fileExtension);
 
-  return {
-    folder,
-    publicId,
-    fullPath,
-    fileExtension,
-    timestamp,
-    randomString,
-  };
+  return { folder, publicId, fullPath, fileExtension, timestamp, randomString };
 };
 
-// Run all tests (async version)
 export const runCloudinaryTests = async (file?: File) => {
   console.log("🧪 Running Cloudinary Tests...\n");
 
-  // Test configuration
   const configResult = await testCloudinaryConfig();
   console.log("\n");
 
-  // Test file validation if file provided
   if (file) {
     const validationResult = testFileValidation(file);
     console.log("\n");
 
-    // Generate test file info
     const fileInfo = generateTestFileInfo(file);
     console.log("\n");
 
-    return {
-      config: configResult,
-      validation: validationResult,
-      fileInfo: fileInfo,
-    };
+    return { config: configResult, validation: validationResult, fileInfo };
   }
 
-  return {
-    config: configResult,
-  };
+  return { config: configResult };
 };

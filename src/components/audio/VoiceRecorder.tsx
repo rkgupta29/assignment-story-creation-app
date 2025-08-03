@@ -38,18 +38,11 @@ export function VoiceRecorder({
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Run diagnostics on component mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       console.log("VoiceRecorder: Running diagnostics...");
-
-      // Test browser capabilities
       testBrowserCapabilities();
-
-      // Test audio format support
       testAudioFormats();
-
-      // Test Cloudinary configuration (async)
       runCloudinaryTests().catch(console.error);
     }
   }, []);
@@ -65,8 +58,6 @@ export function VoiceRecorder({
       "audio/wav",
     ];
 
-    console.log("Checking supported MIME types...");
-
     for (const type of types) {
       const isSupported = MediaRecorder.isTypeSupported(type);
       console.log(`${type}: ${isSupported ? "supported" : "not supported"}`);
@@ -77,8 +68,50 @@ export function VoiceRecorder({
     }
 
     console.log("No supported MIME type found, using fallback: audio/webm");
-    return "audio/webm"; // Fallback
+    return "audio/webm";
   };
+
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        const cloudinaryTest = await runCloudinaryTests(file);
+
+        if (!cloudinaryTest.validation?.isValid) {
+          if (!cloudinaryTest.validation?.type.valid) {
+            setError(
+              `Please select a valid audio file. Detected format: ${cloudinaryTest.validation?.type.detected}`
+            );
+          } else if (!cloudinaryTest.validation?.size.valid) {
+            setError(
+              `File too large. Size: ${cloudinaryTest.validation?.size.mb.toFixed(
+                2
+              )}MB (max: ${cloudinaryTest.validation?.size.maxMb}MB)`
+            );
+          }
+          return;
+        }
+
+        if (!cloudinaryTest.config.isAvailable) {
+          setError(
+            "Cloudinary is not properly configured. Please check your environment variables."
+          );
+          console.error(
+            "Cloudinary configuration issue:",
+            cloudinaryTest.config
+          );
+          return;
+        }
+
+        setError(null);
+        setUploadedFile(file);
+        setAudioUrl(URL.createObjectURL(file));
+        setAudioBlob(null);
+        onAudioReady(file);
+      }
+    },
+    [onAudioReady]
+  );
 
   const startRecording = useCallback(async () => {
     try {
@@ -105,13 +138,11 @@ export function VoiceRecorder({
       };
 
       mediaRecorder.onstop = () => {
-        // Create blob with the correct MIME type
         const blob = new Blob(chunks, { type: mimeType });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
 
-        // Determine file extension based on MIME type
         let extension = "webm";
         if (mimeType.includes("ogg")) extension = "ogg";
         else if (mimeType.includes("mp4")) extension = "mp4";
@@ -119,22 +150,15 @@ export function VoiceRecorder({
         else if (mimeType.includes("mp3") || mimeType.includes("mpeg"))
           extension = "mp3";
 
-        // Create file from blob
         const file = new File(
           [blob],
           `voice-story-${Date.now()}.${extension}`,
-          {
-            type: mimeType,
-          }
+          { type: mimeType }
         );
 
-        // Test the recorded file before passing it on
-        console.log("Testing recorded file:");
         runCloudinaryTests(file);
 
         onAudioReady(file);
-
-        // Stop all tracks
         stream.getTracks().forEach((track) => track.stop());
       };
 
@@ -145,11 +169,10 @@ export function VoiceRecorder({
         stream.getTracks().forEach((track) => track.stop());
       };
 
-      mediaRecorder.start(1000); // Collect data every second
+      mediaRecorder.start(1000);
       setIsRecording(true);
       setRecordingTime(0);
 
-      // Start timer
       recordingIntervalRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
@@ -188,52 +211,6 @@ export function VoiceRecorder({
     }
   }, [audioUrl, isPlaying]);
 
-  const handleFileUpload = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-        console.log("File selected for upload:");
-
-        // Run Cloudinary-specific file validation
-        const cloudinaryTest = await runCloudinaryTests(file);
-
-        if (!cloudinaryTest.validation?.isValid) {
-          if (!cloudinaryTest.validation?.type.valid) {
-            setError(
-              `Please select a valid audio file. Detected format: ${cloudinaryTest.validation?.type.detected}`
-            );
-          } else if (!cloudinaryTest.validation?.size.valid) {
-            setError(
-              `File too large. Size: ${cloudinaryTest.validation?.size.mb.toFixed(
-                2
-              )}MB (max: ${cloudinaryTest.validation?.size.maxMb}MB)`
-            );
-          }
-          return;
-        }
-
-        // Check if Cloudinary is properly configured
-        if (!cloudinaryTest.config.isAvailable) {
-          setError(
-            "Cloudinary is not properly configured. Please check your environment variables."
-          );
-          console.error(
-            "Cloudinary configuration issue:",
-            cloudinaryTest.config
-          );
-          return;
-        }
-
-        setError(null);
-        setUploadedFile(file);
-        setAudioUrl(URL.createObjectURL(file));
-        setAudioBlob(null); // Clear recorded blob
-        onAudioReady(file);
-      }
-    },
-    [onAudioReady]
-  );
-
   const clearAudio = useCallback(() => {
     setAudioBlob(null);
     setAudioUrl(null);
@@ -268,14 +245,12 @@ export function VoiceRecorder({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Error Display */}
       {error && (
         <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
           {error}
         </div>
       )}
 
-      {/* Recording Controls */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           {!isRecording ? (
@@ -314,7 +289,6 @@ export function VoiceRecorder({
         )}
       </div>
 
-      {/* File Upload */}
       <div className="space-y-2">
         <Label>Or upload an audio file</Label>
         <div className="flex items-center gap-2">
@@ -341,7 +315,6 @@ export function VoiceRecorder({
         </p>
       </div>
 
-      {/* Audio Player */}
       {audioUrl && (
         <div className="space-y-3 p-4 bg-gray-50 rounded-md">
           <div className="flex items-center justify-between">

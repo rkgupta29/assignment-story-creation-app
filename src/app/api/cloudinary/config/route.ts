@@ -14,8 +14,7 @@ export async function GET() {
       has_api_key: !!process.env.CLOUDINARY_API_KEY,
       has_api_secret: !!process.env.CLOUDINARY_API_SECRET,
     });
-  } catch (error) {
-    console.error("Config check error:", error);
+  } catch {
     return NextResponse.json(
       { available: false, error: "Failed to check configuration" },
       { status: 500 }

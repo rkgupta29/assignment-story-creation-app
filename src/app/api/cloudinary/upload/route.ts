@@ -5,7 +5,6 @@ import {
   UploadApiResponse,
 } from "cloudinary";
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dz1wxlh42",
   api_key: process.env.CLOUDINARY_API_KEY || "428144786176777",
@@ -15,7 +14,6 @@ cloudinary.config({
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if Cloudinary is configured
     if (!process.env.CLOUDINARY_API_SECRET) {
       return NextResponse.json(
         { success: false, error: "Cloudinary API secret not configured" },
@@ -23,7 +21,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse the form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const folder = formData.get("folder") as string;
@@ -37,7 +34,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (max 50MB)
     const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
@@ -51,21 +47,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Parse tags
     let tags: string[] = [];
     if (tagsString) {
       try {
         tags = JSON.parse(tagsString);
       } catch {
-        tags = [tagsString]; // If not JSON, treat as single tag
+        tags = [tagsString];
       }
     }
 
-    // Prepare upload options using Cloudinary's proper types
     const uploadOptions: UploadApiOptions = {
       resource_type: "auto",
       use_filename: true,
@@ -73,39 +66,20 @@ export async function POST(request: NextRequest) {
       overwrite: false,
     };
 
-    if (folder) {
-      uploadOptions.folder = folder;
-    }
+    if (folder) uploadOptions.folder = folder;
+    if (publicId) uploadOptions.public_id = publicId;
+    if (tags.length > 0) uploadOptions.tags = tags;
 
-    if (publicId) {
-      uploadOptions.public_id = publicId;
-    }
-
-    if (tags.length > 0) {
-      uploadOptions.tags = tags;
-    }
-
-    // Add context metadata
     uploadOptions.context = {
       original_name: file.name,
       uploaded_at: new Date().toISOString(),
       file_size: file.size.toString(),
     };
 
-    console.log("Uploading to Cloudinary:", {
-      fileName: file.name,
-      fileSize: file.size,
-      folder: folder,
-      publicId: publicId,
-      tags: tags,
-    });
-
-    // Upload to Cloudinary
     const result = await new Promise<UploadApiResponse>((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(uploadOptions, (error, result) => {
           if (error) {
-            console.error("Cloudinary upload error:", error);
             reject(error);
           } else if (result) {
             resolve(result);
@@ -116,14 +90,6 @@ export async function POST(request: NextRequest) {
         .end(buffer);
     });
 
-    console.log("Cloudinary upload successful:", {
-      public_id: result.public_id,
-      secure_url: result.secure_url,
-      bytes: result.bytes,
-      format: result.format,
-    });
-
-    // Return standardized response
     return NextResponse.json({
       success: true,
       data: {
@@ -137,11 +103,8 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Upload API error:", error);
-
     const errorMessage =
       error instanceof Error ? error.message : "Upload failed";
-
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }

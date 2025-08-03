@@ -1,4 +1,3 @@
-// Audio format validation test utility
 export const testAudioFormats = () => {
   console.log("=== Audio Format Support Test ===");
 
@@ -55,7 +54,6 @@ export const validateAudioFile = (file: File) => {
   console.log("File type:", file.type);
   console.log("File size:", `${(file.size / 1024 / 1024).toFixed(2)} MB`);
 
-  // Extract base MIME type
   const baseMimeType = file.type.split(";")[0].toLowerCase();
   console.log("Base MIME type:", baseMimeType);
 
@@ -71,7 +69,7 @@ export const validateAudioFile = (file: File) => {
   ];
 
   const isValidType = allowedTypes.includes(baseMimeType);
-  const maxSize = 50 * 1024 * 1024; // 50MB
+  const maxSize = 50 * 1024 * 1024;
   const isValidSize = file.size <= maxSize && file.size > 0;
 
   console.log("Type validation:", isValidType ? "✅ Valid" : "❌ Invalid");
@@ -79,11 +77,7 @@ export const validateAudioFile = (file: File) => {
 
   return {
     isValid: isValidType && isValidSize,
-    type: {
-      valid: isValidType,
-      detected: baseMimeType,
-      allowed: allowedTypes,
-    },
+    type: { valid: isValidType, detected: baseMimeType, allowed: allowedTypes },
     size: {
       valid: isValidSize,
       bytes: file.size,
