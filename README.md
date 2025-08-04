@@ -1,1 +1,1 @@
-## Assignment for story creation app
+## Assignment for story creation app for the app
