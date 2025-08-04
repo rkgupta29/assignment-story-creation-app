@@ -1,3 +1,5 @@
+"use client";
+
 import BrandLogo from "@/components/BrandLogo";
 import Image from "next/image";
 import { LoginForm } from "@/components/forms/LoginForm";
