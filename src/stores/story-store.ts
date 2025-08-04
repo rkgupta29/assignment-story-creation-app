@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { Story } from "@/types/story";
 import {
-  getAllStories,
-  subscribeToStories,
+  getStoriesByAuthor,
+  subscribeToStoriesByAuthor,
   deleteStory,
 } from "@/lib/firebase/stories";
 
@@ -17,16 +17,18 @@ interface StoryState {
   loading: boolean;
   error: string | null;
   initialized: boolean;
+  currentUserId: string | null;
   setStories: (stories: Story[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
-  fetchStories: () => Promise<void>;
-  initializeStories: () => void;
+  fetchStories: (userId: string) => Promise<void>;
+  initializeStories: (userId: string) => void;
   addStory: (story: Story) => void;
   updateStory: (storyId: string, updatedStory: Partial<Story>) => void;
   deleteStory: (storyId: string) => Promise<void>;
   removeStoryFromState: (storyId: string) => void;
+  resetStore: () => void;
 }
 
 export const useStoryStore = create<StoryState>((set, get) => ({
@@ -34,6 +36,7 @@ export const useStoryStore = create<StoryState>((set, get) => ({
   loading: true,
   error: null,
   initialized: false,
+  currentUserId: null,
 
   setStories: (stories: Story[]) => {
     set({ stories, loading: false });
@@ -51,13 +54,12 @@ export const useStoryStore = create<StoryState>((set, get) => ({
     set({ error: null });
   },
 
-  fetchStories: async () => {
+  fetchStories: async (userId: string) => {
     try {
       set({ loading: true, error: null });
-      const stories = await getAllStories();
+      const stories = await getStoriesByAuthor(userId);
       set({ stories, loading: false });
     } catch (error) {
-      console.error("Error fetching stories:", error);
       set({
         error:
           error instanceof Error ? error.message : "Failed to fetch stories",
@@ -66,15 +68,21 @@ export const useStoryStore = create<StoryState>((set, get) => ({
     }
   },
 
-  initializeStories: () => {
-    const { initialized } = get();
+  initializeStories: (userId: string) => {
+    const { initialized, currentUserId } = get();
 
-    if (initialized) return;
+    // Reset if switching users or not initialized
+    if (initialized && currentUserId === userId) return;
 
-    set({ loading: true, initialized: true });
+    // Clean up previous subscription
+    if (typeof window !== "undefined" && window.__storiesUnsubscribe) {
+      window.__storiesUnsubscribe();
+    }
 
-    // Subscribe to real-time updates
-    const unsubscribe = subscribeToStories((stories) => {
+    set({ loading: true, initialized: true, currentUserId: userId });
+
+    // Subscribe to real-time updates for specific user
+    const unsubscribe = subscribeToStoriesByAuthor(userId, (stories) => {
       get().setStories(stories);
     });
 
@@ -99,15 +107,13 @@ export const useStoryStore = create<StoryState>((set, get) => ({
 
   deleteStory: async (storyId: string) => {
     try {
-      // Optimistically remove from local state
       get().removeStoryFromState(storyId);
-
-      // Delete from Firestore
       await deleteStory(storyId);
     } catch (error) {
-      console.error("Error deleting story:", error);
-      // Refetch stories to restore state if delete failed
-      get().fetchStories();
+      const { currentUserId } = get();
+      if (currentUserId) {
+        get().fetchStories(currentUserId);
+      }
       throw error;
     }
   },
@@ -117,16 +123,38 @@ export const useStoryStore = create<StoryState>((set, get) => ({
     const updatedStories = stories.filter((story) => story.id !== storyId);
     set({ stories: updatedStories });
   },
+
+  resetStore: () => {
+    // Clean up subscription
+    if (typeof window !== "undefined" && window.__storiesUnsubscribe) {
+      window.__storiesUnsubscribe();
+      window.__storiesUnsubscribe = undefined;
+    }
+
+    set({
+      stories: [],
+      loading: true,
+      error: null,
+      initialized: false,
+      currentUserId: null,
+    });
+  },
 }));
 
-let isInitialized = false;
-
-export const useStoryStoreWithInit = () => {
+export const useStoryStoreWithInit = (userId?: string) => {
   const store = useStoryStore();
 
-  if (!isInitialized) {
-    isInitialized = true;
-    store.initializeStories();
+  // Reset store if user changes or logs out
+  if (!userId) {
+    if (store.initialized) {
+      store.resetStore();
+    }
+    return { ...store, stories: [], loading: false };
+  }
+
+  // Initialize with user ID
+  if (!store.initialized || store.currentUserId !== userId) {
+    store.initializeStories(userId);
   }
 
   return store;

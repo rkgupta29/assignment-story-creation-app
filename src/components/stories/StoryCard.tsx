@@ -19,25 +19,24 @@ import {
   Trash2,
 } from "lucide-react";
 import { Story, StoryType } from "@/types/story";
-import { useStoryStore } from "@/stores/story-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { deleteStory } from "@/lib/firebase/stories";
 import { StoryContentRenderer } from "./StoryContentRenderer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface StoryCardProps {
   story: Story;
+  onDelete?: (storyId: string) => void;
 }
 
-export function StoryCard({ story }: StoryCardProps) {
+export function StoryCard({ story, onDelete }: StoryCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { deleteStory } = useStoryStore();
   const { user } = useAuthStore();
   const router = useRouter();
 
-  // Check if current user is the author
   const isAuthor = user?.uid === story.authorId;
 
   const handlePlayPause = () => {
@@ -73,16 +72,17 @@ export function StoryCard({ story }: StoryCardProps) {
     try {
       setIsDeleting(true);
       await deleteStory(story.id);
+      onDelete?.(story.id);
     } catch (error) {
-      console.error("Error deleting story:", error);
-      alert("Failed to delete story. Please try again.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete story";
+      alert(`Error deleting story: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
     }
   };
 
   const getPreviewContent = (content: string, maxLength: number = 150) => {
-    // Strip HTML tags for preview
     const textContent = content.replace(/<[^>]*>/g, "");
     return textContent.length > maxLength
       ? textContent.substring(0, maxLength) + "..."
@@ -90,7 +90,6 @@ export function StoryCard({ story }: StoryCardProps) {
   };
 
   const getTruncatedHTML = (html: string, maxLength: number = 150) => {
-    // Create a temporary element to extract text
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
     const textContent = tempDiv.textContent || tempDiv.innerText || "";
@@ -99,7 +98,6 @@ export function StoryCard({ story }: StoryCardProps) {
       return html;
     }
 
-    // If text is too long, return truncated text wrapped in a paragraph
     const truncatedText = textContent.substring(0, maxLength) + "...";
     return `<p>${truncatedText}</p>`;
   };
@@ -148,7 +146,11 @@ export function StoryCard({ story }: StoryCardProps) {
                   className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                   title="Delete story"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  {isDeleting ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             )}

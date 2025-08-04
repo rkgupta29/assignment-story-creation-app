@@ -14,7 +14,6 @@ import { StoryContentStyles } from "@/components/stories/StoryContentRenderer";
 import { StoryType, StoryUpdateData, Story } from "@/types/story";
 import { getStoryBySlug, updateStory } from "@/lib/firebase/stories";
 import { useAuthStore } from "@/stores/auth-store";
-import { useStoryStore } from "@/stores/story-store";
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 
@@ -32,7 +31,6 @@ export default function EditStoryPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useAuthStore();
-  const { updateStory: updateStoryInStore } = useStoryStore();
 
   const [story, setStory] = useState<Story | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -117,12 +115,6 @@ export default function EditStoryPage() {
       }
 
       await updateStory(story.id, updateData);
-
-      // Update local store
-      updateStoryInStore(story.id, {
-        ...updateData,
-        updatedAt: new Date(),
-      });
 
       // Redirect back to story
       router.push(`/stories/${story.slug}`);

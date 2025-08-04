@@ -12,10 +12,9 @@ import { AlertCircle, FileText, Mic } from "lucide-react";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { StoryContentStyles } from "@/components/stories/StoryContentRenderer";
 import { VoiceRecorder } from "@/components/audio/VoiceRecorder";
-import { StoryType, CreateStoryFormData, Story } from "@/types/story";
+import { StoryType, CreateStoryFormData } from "@/types/story";
 import { createStory, mockVoiceToText } from "@/lib/firebase/stories";
 import { useAuthStore } from "@/stores/auth-store";
-import { useStoryStore } from "@/stores/story-store";
 
 const createStorySchema = z.object({
   title: z
@@ -31,7 +30,6 @@ type CreateStorySchema = z.infer<typeof createStorySchema>;
 export function CreateStoryForm() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { addStory } = useStoryStore();
 
   const [storyType, setStoryType] = useState<StoryType>(StoryType.TEXT);
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -111,36 +109,9 @@ export function CreateStoryForm() {
       };
 
       // Create story with progress tracking for audio uploads
-      const storyId = await createStory(
-        storyData,
-        user.uid,
-        user.name,
-        (progress) => setUploadProgress(progress)
+      await createStory(storyData, user.uid, user.name, (progress) =>
+        setUploadProgress(progress)
       );
-
-      // Create the new story object that matches the Story interface
-      const now = new Date();
-      const slug = `${storyData.title
-        .toLowerCase()
-        .replace(/\s+/g, "-")}-${Date.now()}`;
-
-      const newStory: Story = {
-        id: storyId,
-        title: storyData.title,
-        content: storyData.content,
-        type: storyData.type,
-        authorId: user.uid,
-        authorName: user.name,
-        slug,
-        createdAt: now,
-        updatedAt: now,
-        // Only include audioUrl and audioTranscript if they exist
-        ...(storyData.audioTranscript && {
-          audioTranscript: storyData.audioTranscript,
-        }),
-      };
-
-      addStory(newStory);
 
       // Redirect to home or story page
       router.push("/");

@@ -23,7 +23,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   clearError: () => void;
   initializeAuth: () => void;
-  fetchUserProfile: (uid: string) => Promise<void>;
+  fetchUserProfile: (firebaseUser: FirebaseUser) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       error: null,
     });
 
-    get().fetchUserProfile(firebaseUser.uid);
+    get().fetchUserProfile(firebaseUser);
   },
 
   setUserProfile: (profile: User | null) => {
@@ -64,35 +64,60 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   setError: (error: string | null) => {
-    set({ error });
+    set({ error, loading: false });
   },
 
   clearError: () => {
     set({ error: null });
   },
 
-  fetchUserProfile: async (uid: string) => {
+  fetchUserProfile: async (firebaseUser: FirebaseUser) => {
     try {
-      const profile = await getDocument("users", uid);
+      const profile = await getDocument("users", firebaseUser.uid);
 
       if (profile) {
         const user = {
-          uid: profile.id || uid,
-          email: profile.email,
-          name: profile.name,
-          emailVerified: profile.emailVerified || false,
+          uid: profile.id || firebaseUser.uid,
+          email: profile.email || firebaseUser.email || "",
+          name: profile.name || firebaseUser.displayName || "User",
+          emailVerified:
+            firebaseUser.emailVerified || profile.emailVerified || false,
           createdAt:
-            profile.createdAt?.toDate?.() || new Date(profile.createdAt),
+            profile.createdAt?.toDate?.() ||
+            new Date(profile.createdAt) ||
+            new Date(),
           updatedAt:
-            profile.updatedAt?.toDate?.() || new Date(profile.updatedAt),
+            profile.updatedAt?.toDate?.() ||
+            new Date(profile.updatedAt) ||
+            new Date(),
         } as User;
 
         get().setUserProfile(user);
       } else {
-        set({ loading: false, error: "Profile not found" });
+        // If no profile exists, create a basic user from Firebase data
+        const fallbackUser = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || "",
+          name: firebaseUser.displayName || "User",
+          emailVerified: firebaseUser.emailVerified,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as User;
+
+        get().setUserProfile(fallbackUser);
       }
     } catch {
-      set({ loading: false, error: "Failed to load profile" });
+      // If there's an error fetching profile, create a basic user from Firebase data
+      const fallbackUser = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || "",
+        name: firebaseUser.displayName || "User",
+        emailVerified: firebaseUser.emailVerified,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as User;
+
+      get().setUserProfile(fallbackUser);
     }
   },
 
@@ -122,7 +147,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      set({ loading: false, user: null });
+      set({ loading: false, user: null, isAuthenticated: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Failed to sign out",

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Story, StoryType } from "@/types/story";
 import { getStoryBySlug } from "@/lib/firebase/stories";
+import { useAuthStore } from "@/stores/auth-store";
 import {
   StoryContentRenderer,
   StoryContentStyles,
@@ -23,6 +24,7 @@ import Sidebar from "@/components/Sidebar";
 export default function StoryPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuthStore();
   const slug = params.slug as string;
 
   const [story, setStory] = useState<Story | null>(null);
@@ -33,19 +35,26 @@ export default function StoryPage() {
 
   useEffect(() => {
     const fetchStory = async () => {
-      if (!slug) return;
+      if (!slug || !user) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
         const fetchedStory = await getStoryBySlug(slug);
 
         if (fetchedStory) {
+          // Check if the current user is the author of the story
+          if (fetchedStory.authorId !== user.uid) {
+            setError("You don't have permission to view this story");
+            return;
+          }
           setStory(fetchedStory);
         } else {
           setError("Story not found");
         }
-      } catch (err) {
-        console.error("Error fetching story:", err);
+      } catch {
         setError("Failed to load story");
       } finally {
         setLoading(false);
@@ -53,7 +62,7 @@ export default function StoryPage() {
     };
 
     fetchStory();
-  }, [slug]);
+  }, [slug, user]);
 
   const handlePlayPause = () => {
     if (story?.type === StoryType.VOICE && story.audioUrl) {
@@ -95,7 +104,7 @@ export default function StoryPage() {
           </h1>
           <Button onClick={() => router.push("/")} variant="outline">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to All Stories
+            Back to My Stories
           </Button>
         </div>
       </div>
@@ -107,7 +116,6 @@ export default function StoryPage() {
       <div className="min-h-screen bg-gray-50">
         <StoryContentStyles />
         <div className="max-w-4xl mx-auto px-6 py-8">
-          {/* Header */}
           <div className="mb-8">
             <Button
               onClick={() => router.push("/")}
@@ -115,11 +123,10 @@ export default function StoryPage() {
               className="mb-6"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              Back to My Stories
             </Button>
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-              {/* Story Type Badge */}
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                 {story.type === StoryType.TEXT ? (
                   <FileText className="h-4 w-4" />
@@ -134,18 +141,15 @@ export default function StoryPage() {
                 </div>
               </div>
 
-              {/* Title */}
               <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
                 {story.title}
               </h1>
 
-              {/* Author */}
               <div className="flex items-center gap-2 text-gray-600 mb-6">
                 <User className="h-5 w-5" />
                 <span className="text-lg">by {story.authorName}</span>
               </div>
 
-              {/* Audio Player (for voice stories) */}
               {story.type === StoryType.VOICE && story.audioUrl && (
                 <div className="mb-8 p-6 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-4 mb-4">
@@ -175,7 +179,6 @@ export default function StoryPage() {
                 </div>
               )}
 
-              {/* Content */}
               <div className="mt-8">
                 {story.type === StoryType.TEXT ? (
                   <StoryContentRenderer
@@ -201,11 +204,10 @@ export default function StoryPage() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="mt-8 flex justify-center">
             <Button onClick={() => router.push("/")} variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to All Stories
+              Back to My Stories
             </Button>
           </div>
         </div>

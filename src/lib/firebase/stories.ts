@@ -108,10 +108,17 @@ export const getStoryById = async (storyId: string): Promise<Story | null> => {
 export const getStoriesByAuthor = async (
   authorId: string
 ): Promise<Story[]> => {
-  return await getDocuments<Story>(COLLECTION_NAME, [
+  // Fetch stories without orderBy to avoid composite index requirement
+  const stories = await getDocuments<Story>(COLLECTION_NAME, [
     queryHelpers.where("authorId", "==", authorId),
-    queryHelpers.orderBy("createdAt", "desc"),
   ]);
+
+  // Sort client-side by createdAt (descending - newest first)
+  return stories.sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB.getTime() - dateA.getTime();
+  });
 };
 
 export const updateStory = async (
@@ -132,6 +139,28 @@ export const subscribeToStories = (callback: (stories: Story[]) => void) => {
     COLLECTION_NAME,
     [queryHelpers.orderBy("createdAt", "desc")],
     callback
+  );
+};
+
+/**
+ * Sets up real-time subscription to stories for a specific author
+ */
+export const subscribeToStoriesByAuthor = (
+  authorId: string,
+  callback: (stories: Story[]) => void
+) => {
+  return subscribeToDocuments<Story>(
+    COLLECTION_NAME,
+    [queryHelpers.where("authorId", "==", authorId)],
+    (stories) => {
+      // Sort client-side by createdAt (descending - newest first)
+      const sortedStories = stories.sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateB.getTime() - dateA.getTime();
+      });
+      callback(sortedStories);
+    }
   );
 };
 
