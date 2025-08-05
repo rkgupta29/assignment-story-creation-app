@@ -17,6 +17,7 @@ import {
   Calendar,
   Edit,
   Trash2,
+  Download,
 } from "lucide-react";
 import { Story, StoryType } from "@/types/story";
 import { useAuthStore } from "@/stores/auth-store";
@@ -24,6 +25,7 @@ import { deleteStory } from "@/lib/firebase/stories";
 import { StoryContentRenderer } from "./StoryContentRenderer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { exportStoryToPDF } from "@/utils/pdf-export";
 
 interface StoryCardProps {
   story: Story;
@@ -33,6 +35,7 @@ interface StoryCardProps {
 export function StoryCard({ story, onDelete }: StoryCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { user } = useAuthStore();
   const router = useRouter();
@@ -79,6 +82,19 @@ export function StoryCard({ story, onDelete }: StoryCardProps) {
       alert(`Error deleting story: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      await exportStoryToPDF(story);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to export story";
+      alert(`Error exporting story: ${errorMessage}`);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -129,6 +145,20 @@ export function StoryCard({ story, onDelete }: StoryCardProps) {
             </div>
             {isAuthor && (
               <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  title="Export to PDF"
+                >
+                  {isExporting ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"

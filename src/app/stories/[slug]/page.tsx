@@ -11,6 +11,7 @@ import {
   User,
   FileText,
   Mic,
+  Download,
 } from "lucide-react";
 import { Story, StoryType } from "@/types/story";
 import { getStoryBySlug } from "@/lib/firebase/stories";
@@ -20,6 +21,7 @@ import {
   StoryContentStyles,
 } from "@/components/stories/StoryContentRenderer";
 import Sidebar from "@/components/Sidebar";
+import { exportStoryToPDF } from "@/utils/pdf-export";
 
 export default function StoryPage() {
   const params = useParams();
@@ -31,6 +33,7 @@ export default function StoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -82,6 +85,21 @@ export default function StoryPage() {
       day: "numeric",
       year: "numeric",
     }).format(new Date(date));
+  };
+
+  const handleExport = async () => {
+    if (!story) return;
+    
+    try {
+      setIsExporting(true);
+      await exportStoryToPDF(story);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to export story";
+      alert(`Error exporting story: ${errorMessage}`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (loading) {
@@ -145,9 +163,24 @@ export default function StoryPage() {
                 {story.title}
               </h1>
 
-              <div className="flex items-center gap-2 text-gray-600 mb-6">
-                <User className="h-5 w-5" />
-                <span className="text-lg">by {story.authorName}</span>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <User className="h-5 w-5" />
+                  <span className="text-lg">by {story.authorName}</span>
+                </div>
+                <Button
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className="flex items-center gap-2"
+                  variant="outline"
+                >
+                  {isExporting ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {isExporting ? "Exporting..." : "Export PDF"}
+                </Button>
               </div>
 
               {story.type === StoryType.VOICE && story.audioUrl && (
